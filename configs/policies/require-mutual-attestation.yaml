@@ -1,0 +1,22 @@
+policy_id: require-mutual-attestation
+max_evidence_age_seconds: 60
+require_session_binding: true
+local_endpoint:
+  require_any: [physical_tpm]
+  tpm:
+    require_measured_boot: true
+    require_ima: true
+    required_pcrs:
+      10: good-pcr-10
+remote_endpoint:
+  require_any: [tee]
+  tee:
+    permitted_types: [mock_snp, mock_tdx, mock_sgx]
+    debug_disabled: true
+    measurements_allowlist: [tee-good-measurement]
+    acceptable_tcb_status: [up_to_date, acceptable]
+mutual:
+  both_sides_attested: true
+degraded_mode:
+  allow_unauthenticated_subjects: []
+

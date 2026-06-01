@@ -1,0 +1,5 @@
+subject_id: endpoint-b
+subject_type: vm
+capabilities:
+  - tee
+

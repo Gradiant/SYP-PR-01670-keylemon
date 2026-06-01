@@ -1,0 +1,5 @@
+subject_id: endpoint-a
+subject_type: node
+capabilities:
+  - physical_tpm
+

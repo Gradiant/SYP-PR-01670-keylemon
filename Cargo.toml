@@ -1,0 +1,49 @@
+[package]
+name = "keylemon"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[workspace]
+resolver = "3"
+members = [
+    "crates/attestation-core",
+    "crates/policy-engine",
+    "crates/session-binding",
+    "crates/attestation-broker",
+    "crates/wrapper",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "Apache-2.0"
+
+[workspace.dependencies]
+anyhow = "1"
+axum = "0.8"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde", "clock"] }
+ed25519-dalek = { version = "2", features = ["rand_core", "serde"] }
+hex = "0.4"
+rand_core = { version = "0.6", features = ["getrandom"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+sha2 = "0.10"
+thiserror = "2"
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tracing = "0.1"
+
+[dependencies]
+anyhow.workspace = true
+attestation-broker = { path = "crates/attestation-broker" }
+attestation-core = { path = "crates/attestation-core" }
+chrono.workspace = true
+policy-engine = { path = "crates/policy-engine" }
+session-binding = { path = "crates/session-binding" }
+wrapper = { path = "crates/wrapper" }
+

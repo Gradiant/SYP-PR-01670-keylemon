@@ -1,0 +1,22 @@
+[package]
+name = "attestation-broker"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+attestation-core = { path = "../attestation-core" }
+axum.workspace = true
+chrono.workspace = true
+policy-engine = { path = "../policy-engine" }
+serde.workspace = true
+serde_json.workspace = true
+session-binding = { path = "../session-binding" }
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+tower = { workspace = true, features = ["util"] }
+

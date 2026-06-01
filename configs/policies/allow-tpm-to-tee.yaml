@@ -1,0 +1,17 @@
+policy_id: allow-tpm-to-tee
+max_evidence_age_seconds: 60
+require_session_binding: true
+local_endpoint:
+  require_any: [physical_tpm]
+remote_endpoint:
+  require_any: [tee]
+  tee:
+    permitted_types: [mock_snp, mock_tdx]
+    debug_disabled: true
+    measurements_allowlist: [tee-good-measurement]
+    acceptable_tcb_status: [up_to_date, acceptable]
+mutual:
+  both_sides_attested: true
+degraded_mode:
+  allow_unauthenticated_subjects: []
+

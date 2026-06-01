@@ -1,0 +1,12 @@
+policy_id: degraded-mode
+max_evidence_age_seconds: 60
+require_session_binding: true
+local_endpoint:
+  require_any: []
+remote_endpoint:
+  require_any: []
+mutual:
+  both_sides_attested: true
+degraded_mode:
+  allow_unauthenticated_subjects: ["*"]
+

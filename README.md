@@ -1,61 +1,63 @@
 # Keylemon
 
-Keylemon is a proof-of-concept hybrid attestation broker for Keylime deployments.
-It keeps Keylime as the TPM/vTPM verifier of record, adds technology-specific
-TEE verifier interfaces, normalizes verifier output into signed claims, evaluates
-directional policies, and issues short-lived credentials for wrapper-managed
-mTLS sessions.
+Keylemon is a Rust-first proof of concept for capability-driven platform attestation. It models separate TPM and TEE evidence, composes verifier results through policy, and demonstrates session-bound authorization with short-lived signed tokens.
 
-This repository started empty, so the implementation is an external broker and
-wrapper scaffold rather than a patch to upstream Keylime.
+## Workspace
 
-## Implemented PoC Pieces
+- `crates/attestation-core`: domain models, normalized claims, verifier trait, mock TPM and mock TEE verifiers.
+- `crates/policy-engine`: YAML policy model and evaluator.
+- `crates/session-binding`: nonces, ephemeral keys, transcript hashes, and signed short-lived attestation tokens.
+- `crates/attestation-broker`: broker library plus axum API routes for challenges, evidence, decisions, tokens, and schema hints.
+- `crates/wrapper`: deterministic traffic gate and TCP wrapper skeleton.
+- `examples/`: local mock scenarios.
+- `configs/`: demo policies and endpoint descriptors.
 
-- Normalized capability, endpoint, claim, and attestation result models.
-- Ed25519 signatures over canonical attestation result documents.
-- Declarative YAML policy evaluator with local/remote/mutual sections.
-- Mock TEE verifier for CI and local development.
-- Keylime latest-attestation ingestion adapter for TPM/vTPM claim mapping.
-- Short-lived X.509 certificate issuer with an attestation result digest
-  extension.
-- Minimal stdlib HTTP broker API.
-- TCP wrapper skeleton for application-transparent mTLS tunnels.
-- Public JSON schema descriptions for the broker API.
-- Mock mutual-attestation and echo-gate demos.
+## Security Scope
 
-## Run Tests
+This repository does not perform real TPM quote validation, real TEE collateral validation, mTLS, or Keylime verifier integration yet. The TPM and TEE verifiers are deterministic mocks for local architecture and policy tests. Real Keylime, AMD SEV-SNP, Intel TDX, SGX, and TEE-backed vTPM support are future backends documented in `docs/future-real-backends.md`.
+
+## Build And Test
 
 ```bash
-uv sync --dev
-uv run python -m unittest discover -s tests
-uv run pytest
-uv run ruff check .
+cargo fmt --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
 ```
 
-## Run Broker
+Or run the canonical script:
 
 ```bash
-uv run keylemon-broker --policy examples/policy.yaml --host 127.0.0.1 --port 8765
+scripts/test.sh
 ```
 
-## API Sketch
-
-- `POST /v1/challenges`: input `{"public_key_pem": "..."}`.
-- `POST /v1/verify/tee/mock`: verifies mock TEE evidence and returns a signed result.
-- `POST /v1/decide`: evaluates local and remote signed attestation results.
-- `POST /v1/certificates`: issues a short-lived PEM certificate for an allowed attestation result.
-- `GET /v1/schemas`: returns JSON schema fragments for the broker request/response shapes.
-
-## Run Demos
+## Demo Scenarios
 
 ```bash
-uv run python examples/mock_mutual_attestation.py
-uv run python examples/echo_demo.py
+cargo run --example scenario_allowed
+cargo run --example scenario_ima_fail
+cargo run --example scenario_tee_debug
+cargo run --example scenario_bad_measurement
+cargo run --example scenario_replay
+cargo run --example scenario_session_binding_fail
+cargo run --example scenario_degraded_mode
 ```
 
-The mock TEE backend is not a security mechanism. It exists to validate broker,
-policy, claim-signing, and wrapper flows before adding real TEE collateral
-verification.
+Expected outputs are deterministic decision lines, for example:
 
-See [docs/architecture.md](docs/architecture.md) for the broker, wrapper,
-Keylime, and TEE verifier sequence.
+```text
+decision=allow reason=policy_satisfied
+decision=deny reason=attestation verification failed: ima runtime policy failed
+decision=deny reason=attestation verification failed: tee debug mode enabled
+```
+
+Run all examples:
+
+```bash
+scripts/demo.sh
+```
+
+## Local Cleanup
+
+```bash
+scripts/clean.sh
+```
